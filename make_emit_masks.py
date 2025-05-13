@@ -67,8 +67,8 @@ def build_line_masks(start_line: int, stop_line: int, rdnfile: str, locfile: str
 
         elevation_m = loc[:, 2]
         latitude = loc[:, 1]
-        longitudeE = loc[:, 0]
-        az, zen, ra, dec, h = sunpos(dt, latitude, longitudeE,
+        longitude = loc[:, 0]
+        az, zen, ra, dec, h = sunpos(dt, latitude, longitude,
                                      elevation_m, radians=True).T
 
         rho = (((rdn * np.pi) / (irr.T)).T / np.cos(zen)).T
@@ -131,6 +131,7 @@ def main():
     atm_shp = envi.open(envi_header(args.atmfile)).open_memmap(interleave='bil').shape
     loc_shp = envi.open(envi_header(args.locfile)).open_memmap(interleave='bil').shape
 
+    cloud_dset = gdal.Open(args.cloudfile)
 
     # Check file size consistency
     if loc_shp[0] != rdn_shp[0] or loc_shp[2] != rdn_shp[2]:
@@ -139,6 +140,8 @@ def main():
         raise ValueError('Label and input file dimensions do not match.')
     if loc_shp[1] != 3:
         raise ValueError('LOC file should have three bands.')
+    if cloud_dset.RasterYSize != rdn_shp[0] or cloud_dset.RasterXSize != rdn_shp[2]:
+        raise ValueError('Cloud mask and input file dimensions do not match.')
 
     # Get wavelengths and bands
     if args.wavelengths is not None:
@@ -193,7 +196,7 @@ def main():
     irr_resamp = np.array(irr_resamp, dtype=np.float32)
 
     rdn_dataset = gdal.Open(args.rdnfile, gdal.GA_ReadOnly)
-    maskbands = 8
+    maskbands = 9
 
     # Build output dataset
     driver = gdal.GetDriverByName('ENVI')
@@ -213,13 +216,13 @@ def main():
     linebreaks = np.linspace(0, rdn_shp[0], num=args.n_cores*3).astype(int)
 
     irrid = ray.put(irr_resamp)
-    jobs = [build_line_masks.remote(linebreaks[_l], linebreaks[_l+1], args.rdnfile, args.locfile, args.atmfile, dt, h2o_band, aod_bands, pixel_size, args.outfile, wl, irrid) for _l in range(len(linebreaks)-1)]
+    jobs = [build_line_masks.remote(linebreaks[_l], linebreaks[_l+1], args.rdnfile, args.locfile, args.atmfile, dt, h2o_band, aod_bands, pixel_size, wl, irrid) for _l in range(len(linebreaks)-1)]
     rreturn = [ray.get(jid) for jid in jobs]
     ray.shutdown()
 
     mask = np.zeros((rdn_shp[0], maskbands, rdn_shp[2]))
     for lm, start_line, stop_line in rreturn:
-        mask[start_line:stop_line,...] = lm
+        mask[start_line:stop_line,:8] = lm
 
     bad = np.squeeze(mask[:, 0, :]) <= -9990
 
@@ -233,11 +236,15 @@ def main():
     # Combine Cloud, Cirrus, Water, Spacecraft, and Buffer masks
     mask[:, 7, :] = np.logical_or(np.sum(mask[:,0:5,:], axis=1) > 0, mask[:,5,:] > args.aerosol_threshold)
 
+    # SpecTF-Cloud probability
+    mask[:,8,:] = cloud_dset.ReadAsArray()
+
     hdr = rdn_hdr.copy()
     hdr['bands'] = str(maskbands)
     hdr['band names'] = ['Cloud flag', 'Cirrus flag', 'Water flag',
                          'Spacecraft Flag', 'Dilated Cloud Flag',
-                         'AOD550', 'H2O (g cm-2)', 'Aggregate Flag']
+                         'AOD550', 'H2O (g cm-2)', 'Aggregate Flag',
+                         'SpecTF-Cloud probability']
     hdr['interleave'] = 'bil'
     del hdr['wavelength']
     del hdr['fwhm']
