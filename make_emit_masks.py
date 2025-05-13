@@ -5,18 +5,16 @@ Authors: David R. Thompson, david.r.thompson@jpl.nasa.gov,
          Philip G. Brodrick, philip.brodrick@jpl.nasa.gov
 """
 
-import os
 import argparse
 from osgeo import gdal
 import numpy as np
 from spectral.io import envi
-from isofit.core.sunposition import sunpos
-from isofit.core.common import resample_spectrum
-from datetime import datetime
 from scipy.ndimage.morphology import distance_transform_edt
+from isofit.core.common import resample_spectrum
 from emit_utils.file_checks import envi_header
 import ray
 import multiprocessing
+import xarray as xr
 
 
 def haversine_distance(lon1, lat1, lon2, lat2, radius=6335439):
@@ -42,9 +40,8 @@ def haversine_distance(lon1, lat1, lon2, lat2, radius=6335439):
 
     return d
 
-
 @ray.remote
-def build_line_masks(start_line: int, stop_line: int, rdnfile: str, locfile: str, atmfile: str, dt: datetime, h2o_band: np.array, aod_bands: np.array, pixel_size: float, wl: np.array, irr: np.array):
+def build_line_masks(start_line: int, stop_line: int, rdnfile: str, locfile: str, obsfile: str, atmfile: str, h2o_band: np.array, aod_bands: np.array, pixel_size: float, wl: np.array, irr: np.array):
     # determine glint bands having negligible water reflectance
     b450 = np.argmin(abs(wl-450))
     b762 = np.argmin(abs(wl-762))
@@ -56,6 +53,7 @@ def build_line_masks(start_line: int, stop_line: int, rdnfile: str, locfile: str
 
     rdn_ds = envi.open(envi_header(rdnfile)).open_memmap(interleave='bil')
     loc_ds = envi.open(envi_header(locfile)).open_memmap(interleave='bil')
+    obs_ds = envi.open(envi_header(obsfile)).open_memmap(interleave='bil')
     atm_ds = envi.open(envi_header(atmfile)).open_memmap(interleave='bil')
 
     return_mask = np.zeros((stop_line - start_line, 8, rdn_ds.shape[2]))
@@ -65,11 +63,9 @@ def build_line_masks(start_line: int, stop_line: int, rdnfile: str, locfile: str
         rdn = rdn_ds[line,...].copy().astype(np.float32).T
         atm = atm_ds[line,...].copy().astype(np.float32).T
 
-        elevation_m = loc[:, 2]
+        zen = np.radians(obs_ds[line,4].copy().astype(np.float32).T)
+
         latitude = loc[:, 1]
-        longitude = loc[:, 0]
-        az, zen, ra, dec, h = sunpos(dt, latitude, longitude,
-                                     elevation_m, radians=True).T
 
         rho = (((rdn * np.pi) / (irr.T)).T / np.cos(zen)).T
 
@@ -110,12 +106,12 @@ def build_line_masks(start_line: int, stop_line: int, rdnfile: str, locfile: str
 
     return return_mask, start_line, stop_line
 
-
 def main():
 
     parser = argparse.ArgumentParser(description="Remove glint")
     parser.add_argument('rdnfile', type=str, metavar='RADIANCE')
     parser.add_argument('locfile', type=str, metavar='LOCATIONS')
+    parser.add_argument('obsfile', type=str, metavar='OBSERVATIONS')
     parser.add_argument('atmfile', type=str, metavar='SUBSET_LABELS')
     parser.add_argument('cloudfile', type=str, metavar='SPECTF_CLOUD_PROB')
     parser.add_argument('irrfile', type=str, metavar='SOLAR_IRRADIANCE')
@@ -176,15 +172,6 @@ def main():
             center_pixels[0, 1], center_pixels[0, 0], center_pixels[1, 1], center_pixels[1, 0])
         del loc_memmap, center_pixels
 
-    # find solar zenith
-    fid = os.path.split(args.rdnfile)[1].split('_')[0]
-    for prefix in ['prm', 'ang', 'emit']:
-        fid = fid.replace(prefix, '')
-    dt = datetime.strptime(fid, '%Y%m%dt%H%M%S')
-
-    day_of_year = dt.timetuple().tm_yday
-    print(day_of_year, dt)
-
     # convert from microns to nm
     if not any(wl > 100):
         wl = wl*1000.0
@@ -216,7 +203,7 @@ def main():
     linebreaks = np.linspace(0, rdn_shp[0], num=args.n_cores*3).astype(int)
 
     irrid = ray.put(irr_resamp)
-    jobs = [build_line_masks.remote(linebreaks[_l], linebreaks[_l+1], args.rdnfile, args.locfile, args.atmfile, dt, h2o_band, aod_bands, pixel_size, wl, irrid) for _l in range(len(linebreaks)-1)]
+    jobs = [build_line_masks.remote(linebreaks[_l], linebreaks[_l+1], args.rdnfile, args.locfile, args.obsfile, args.atmfile, h2o_band, aod_bands, pixel_size, wl, irrid) for _l in range(len(linebreaks)-1)]
     rreturn = [ray.get(jid) for jid in jobs]
     ray.shutdown()
 
@@ -244,7 +231,7 @@ def main():
     hdr['band names'] = ['Cloud flag', 'Cirrus flag', 'Water flag',
                          'Spacecraft Flag', 'Dilated Cloud Flag',
                          'AOD550', 'H2O (g cm-2)', 'Aggregate Flag',
-                         'SpecTF-Cloud probability']
+                         'SpecTf-Cloud probability']
     hdr['interleave'] = 'bil'
     del hdr['wavelength']
     del hdr['fwhm']
