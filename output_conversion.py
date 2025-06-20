@@ -18,7 +18,7 @@ def main():
     converts L2AMaskTf PGE output to DAAC compatable formats, with supporting metadata''', add_help=True)
 
     parser.add_argument('mask_output_filename', type=str, help="Output Mask netcdf filename")
-    parser.add_argument('mask_file', type=str, help="EMIT L2A water/cloud mask ENVI file")
+    parser.add_argument('mask_file', type=str, help="EMIT L2A cloud mask ENVI file")
     parser.add_argument('loc_file', type=str, help="EMIT L1B location data ENVI file")
     parser.add_argument('glt_file', type=str, help="EMIT L1B glt ENVI file")
     parser.add_argument('version', type=str, help="3 digit (with leading V) version number")
@@ -48,8 +48,7 @@ def main():
     #TODO: UPDATE TITLE AND SUMMARY
     nc_ds.title = "EMIT L2A Masks 60 m " + args.version   
     nc_ds.summary = nc_ds.summary + \
-        f"\\n\\nThis file contains masks for L2A estimated surface reflectances \
-and geolocation data. Masks account for clouds and cloud shadows. \
+        f"\\n\\nThis file contains masks for L2A estimated clouds and cloud shadow masks and geolocation data. \
 Geolocation data (latitude, longitude, height) and a lookup table to project the data are also included."
     nc_ds.sync()
 
