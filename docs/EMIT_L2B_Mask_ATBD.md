@@ -189,21 +189,20 @@ Given that this is a deep learning model trained on a (relatively) small, sparse
 - The model also exhibits higher entropy over bright plains and very dense, dark vegetative regions that don't have any cloud trace. 
     - These values tend to be below the $P(0.51)$ threshold, though, but nonetheless something to look out for.
 
-### Figure — Thin‑haze scene, Chaiyaphum (Thailand)
-| RGB | False Color | SpecTf |
+### Figure — Thin‑haze scene, by Chaiyaphum (Thailand)
+| RGB | False Color | SpecTf |
 |-----|-------------|--------|
-| ![Thin‑haze RGB](figs/emit20240201t033628_rgb.png) | ![Thin‑haze false color](figs/emit20240201t033628_falsecolor.png) | ![Thin‑haze spectral](figs/emit20240201t033628_spectf.png) |
+| <img src="figs/emit20240201t033628_rgb.png" alt="Thin‑haze RGB"> | <img src="figs/emit20240201t033628_falsecolor.png" alt="Thin‑haze false color"> | <img src="figs/emit20240201t033628_spectf.png" alt="Thin‑haze SpecTf"> |
 
-### Figure — Vegetated & aerosol‑rich scene, Purnia (India)
-| RGB | False Color | SpecTf |
+### Figure — Vegetated & aerosol‑rich scene, by Purnia (India)
+| RGB | False Color | SpecTf |
 |-----|-------------|--------|
-| ![Purnia RGB](figs/emit20240201t051259_rgb.png) | ![Purnia false color](figs/emit20240201t051259_falsecolor.png) | ![Purnia spectral](figs/emit20240201t051259_spectf.png) |
+| <img src="figs/emit20240201t051259_rgb.png" alt="India RGB"> | <img src="figs/emit20240201t051259_falsecolor.png" alt="India false color"> | <img src="figs/emit20240201t051259_spectf.png" alt="India SpecTf"> |
 
-### Figure — Dark, dense vegetation, Parque do Xingu (Brazil)
-| RGB | False Color | SpecTf |
+### Figure — Dark, dense vegetation, by Parque do Xingu (Brazil)
+| RGB | False Color | SpecTf |
 |-----|-------------|--------|
-| ![Xingu RGB](figs/emit20240501t135834_rgb.png) | ![Xingu false color](figs/emit20240501t135834_falsecolor.png) | ![Xingu spectral](figs/emit20240501t135834_spectf.png) |
-
+| <img src="figs/emit20240501t135834_rgb.png" alt="Brazil RGB"> | <img src="figs/emit20240501t135834_falsecolor.png" alt="Brazil false color"> | <img src="figs/emit20240501t135834_spectf.png" alt="Brazil SpecTf"> |
 
 Additionally, when interpreting the results of the model's posterior probabilites, it is important to know that the outputs are the likelihoods of if there is or is not a cloud within the pixel space. This is due to the fact that the model was trained on discrete, exclusive class labels. It is not a measure of how much cloud trace there is within the pixel space. I.e. $P(Cloud)=0.10$ means there is a $10$% chance that the pixel is a cloud pixel, not that $10$% of the measured relfectance is a cloud residual or from a cloud-class source.   
 
