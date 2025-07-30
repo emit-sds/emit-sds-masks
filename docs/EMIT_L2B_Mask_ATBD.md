@@ -189,17 +189,22 @@ Given that this is a deep learning model trained on a (relatively) small, sparse
 - The model also exhibits higher entropy over bright plains and very dense, dark vegetative regions that don't have any cloud trace. 
     - These values tend to be below the $P(0.51)$ threshold, though, but nonetheless something to look out for.
 
-### Figure — Thin‑haze scene, by Chaiyaphum (Thailand)
+### Figure: Thin‑haze scene, emit20240201t033628
 | RGB | False Color | SpecTf |
 |-----|-------------|--------|
 | <img src="figs/emit20240201t033628_rgb.png" alt="Thin‑haze RGB"> | <img src="figs/emit20240201t033628_falsecolor.png" alt="Thin‑haze false color"> | <img src="figs/emit20240201t033628_spectf.png" alt="Thin‑haze SpecTf"> |
 
-### Figure — Vegetated & aerosol‑rich scene, by Purnia (India)
+### Figure: Vegetated & aerosol‑rich scene in India, emit20240201t051259
 | RGB | False Color | SpecTf |
 |-----|-------------|--------|
 | <img src="figs/emit20240201t051259_rgb.png" alt="India RGB"> | <img src="figs/emit20240201t051259_falsecolor.png" alt="India false color"> | <img src="figs/emit20240201t051259_spectf.png" alt="India SpecTf"> |
 
-### Figure — Dark, dense vegetation, by Parque do Xingu (Brazil)
+### Figure: Instrument artifact, emit20240301t172047
+| RGB | False Color | SpecTf |
+|-----|-------------|--------|
+| <img src="figs/emit20240301t172047_rgb.png" alt="Instrument artifact RGB"> | <img src="figs/emit20240301t172047_falsecolor.png" alt="Instrument artifact false color"> | <img src="figs/emit20240301t172047_spectf.png" alt="Instrument artifact SpecTf"> |
+
+### Figure: Dark, dense vegetation scene, emit20240501t135834
 | RGB | False Color | SpecTf |
 |-----|-------------|--------|
 | <img src="figs/emit20240501t135834_rgb.png" alt="Brazil RGB"> | <img src="figs/emit20240501t135834_falsecolor.png" alt="Brazil false color"> | <img src="figs/emit20240501t135834_spectf.png" alt="Brazil SpecTf"> |
