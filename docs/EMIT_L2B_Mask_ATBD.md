@@ -183,16 +183,18 @@ Thus, when interpreting the output probabilities, one can reliably infer that $f
 
 ## **6. Constraints and Limitations**
 Given that this is a deep learning model trained on a (relatively) small, sparse set of imperfect human labels, it is bound to be an imperfect classifier. Specifically, as a quantitative measure, the model will provide an incorrect label when using the $P(0.51)$ threshold about $4$% of the time, using the labeled test set as ground truth. Some spectra types have been observed to be more difficult than others for our model to classify properly. Namely, these tend to be: 
-- Scenes where there is a very fine haze. 
+- Scenes where there is a very fine haze. \@ref(fig:cars-plot) [Figure 1](#fig-1)
 - Regions in India and the South Asian subcontinent that are high in vegetation and aerosols.
 - Pixel regions that intersect with the known artifact on the slit and instrument artifacts towards the focal plane array on the right edge. 
 - The model also exhibits higher entropy over bright plains and very dense, dark vegetative regions that don't have any cloud trace. 
     - These values tend to be below the $P(0.51)$ threshold, though, but nonetheless something to look out for.
 
-### Figure: Thin‑haze scene, emit20240201t033628
+The below figures are examples of the above described challenge regions, with the RGB and False Color (1380, 1420, and 1890 nm bands) to show the true cloud presence distribution compared to the output SpecTf results.
+
+### Figure 1: Thin‑haze scene, emit20240201t033628
 | RGB | False Color | SpecTf |
 |-----|-------------|--------|
-| <img src="figs/emit20240201t033628_rgb.png" alt="Thin‑haze RGB"> | <img src="figs/emit20240201t033628_falsecolor.png" alt="Thin‑haze false color"> | <img src="figs/emit20240201t033628_spectf.png" alt="Thin‑haze SpecTf"> |
+| <img id="fig-1" src="figs/emit20240201t033628_rgb.png" alt="Thin‑haze RGB"> | <img src="figs/emit20240201t033628_falsecolor.png" alt="Thin‑haze false color"> | <img src="figs/emit20240201t033628_spectf.png" alt="Thin‑haze SpecTf"> |
 
 ### Figure: Vegetated & aerosol‑rich scene in India, emit20240201t051259
 | RGB | False Color | SpecTf |
