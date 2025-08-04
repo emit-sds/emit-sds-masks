@@ -183,10 +183,10 @@ Thus, when interpreting the output probabilities, one can reliably infer that $f
 
 ## **6. Constraints and Limitations**
 Given that this is a deep learning model trained on a (relatively) small, sparse set of imperfect human labels, it is bound to be an imperfect classifier. Specifically, as a quantitative measure, the model will provide an incorrect label when using the $P(0.51)$ threshold about $4$% of the time, using the labeled test set as ground truth. Some spectra types have been observed to be more difficult than others for our model to classify properly. Namely, these tend to be: 
-- Scenes where there is a very fine haze. \@ref(fig:cars-plot) [Figure 1](#fig-1)
-- Regions in India and the South Asian subcontinent that are high in vegetation and aerosols.
-- Pixel regions that intersect with the known artifact on the slit and instrument artifacts towards the focal plane array on the right edge. 
-- The model also exhibits higher entropy over bright plains and very dense, dark vegetative regions that don't have any cloud trace. 
+- [Figure 1](#fig-1). Scenes where there is a very fine haze. 
+- [Figure 2](#fig-2). Regions in India and the South Asian subcontinent that are high in vegetation and aerosols. 
+- [Figure 3](#fig-3). Pixel regions that intersect with the known artifact on the slit and instrument artifacts towards the focal plane array on the right edge. 
+- [Figure 4](#fig-4). The model also exhibits higher entropy over bright plains and very dense, dark vegetative regions that don't have any cloud trace. 
     - These values tend to be below the $P(0.51)$ threshold, though, but nonetheless something to look out for.
 
 The below figures are examples of the above described challenge regions, with the RGB and False Color (1380, 1420, and 1890 nm bands) to show the true cloud presence distribution compared to the output SpecTf results.
@@ -196,20 +196,20 @@ The below figures are examples of the above described challenge regions, with th
 |-----|-------------|--------|
 | <img id="fig-1" src="figs/emit20240201t033628_rgb.png" alt="Thin‑haze RGB"> | <img src="figs/emit20240201t033628_falsecolor.png" alt="Thin‑haze false color"> | <img src="figs/emit20240201t033628_spectf.png" alt="Thin‑haze SpecTf"> |
 
-### Figure: Vegetated & aerosol‑rich scene in India, emit20240201t051259
+### Figure 2: Vegetated & aerosol‑rich scene in India, emit20240201t051259
 | RGB | False Color | SpecTf |
 |-----|-------------|--------|
-| <img src="figs/emit20240201t051259_rgb.png" alt="India RGB"> | <img src="figs/emit20240201t051259_falsecolor.png" alt="India false color"> | <img src="figs/emit20240201t051259_spectf.png" alt="India SpecTf"> |
+| <img id="fig-2" src="figs/emit20240201t051259_rgb.png" alt="India RGB"> | <img src="figs/emit20240201t051259_falsecolor.png" alt="India false color"> | <img src="figs/emit20240201t051259_spectf.png" alt="India SpecTf"> |
 
-### Figure: Instrument artifact, emit20240301t172047
+### Figure 3: Instrument artifact, emit20240301t172047
 | RGB | False Color | SpecTf |
 |-----|-------------|--------|
-| <img src="figs/emit20240301t172047_rgb.png" alt="Instrument artifact RGB"> | <img src="figs/emit20240301t172047_falsecolor.png" alt="Instrument artifact false color"> | <img src="figs/emit20240301t172047_spectf.png" alt="Instrument artifact SpecTf"> |
+| <img id="fig-3" src="figs/emit20240301t172047_rgb.png" alt="Instrument artifact RGB"> | <img src="figs/emit20240301t172047_falsecolor.png" alt="Instrument artifact false color"> | <img src="figs/emit20240301t172047_spectf.png" alt="Instrument artifact SpecTf"> |
 
-### Figure: Dark, dense vegetation scene, emit20240501t135834
+### Figure 4: Dark, dense vegetation scene, emit20240501t135834
 | RGB | False Color | SpecTf |
 |-----|-------------|--------|
-| <img src="figs/emit20240501t135834_rgb.png" alt="Brazil RGB"> | <img src="figs/emit20240501t135834_falsecolor.png" alt="Brazil false color"> | <img src="figs/emit20240501t135834_spectf.png" alt="Brazil SpecTf"> |
+| <img id="fig-4" src="figs/emit20240501t135834_rgb.png" alt="Brazil RGB"> | <img src="figs/emit20240501t135834_falsecolor.png" alt="Brazil false color"> | <img src="figs/emit20240501t135834_spectf.png" alt="Brazil SpecTf"> |
 
 Additionally, when interpreting the results of the model's posterior probabilites, it is important to know that the outputs are the likelihoods of if there is or is not a cloud within the pixel space. This is due to the fact that the model was trained on discrete, exclusive class labels. It is not a measure of how much cloud trace there is within the pixel space. I.e. $P(Cloud)=0.10$ means there is a $10$% chance that the pixel is a cloud pixel, not that $10$% of the measured relfectance is a cloud residual or from a cloud-class source.   
 
