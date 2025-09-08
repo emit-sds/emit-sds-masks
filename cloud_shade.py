@@ -183,7 +183,7 @@ def main(cloud_file, obs_file, output_file, glt_file,
     logging.info("Run ray trace")
     bounds = (0, 0, solar_azimuth.shape[1] - 1, solar_azimuth.shape[0] - 1)
     clouds_loc = np.where(clouds)
-    antisolar_edge_px_x, antisolar_edge_px_y, antisolar_s = edge_coords_from_target(clouds_loc[1], clouds_loc[0], cwn_to_math(solar_azimuth[clouds] +15 - 180), bounds)
+    antisolar_edge_px_x, antisolar_edge_px_y, antisolar_s = edge_coords_from_target(clouds_loc[1], clouds_loc[0], cwn_to_math(solar_azimuth[clouds] - 180), bounds)
     num_x_pixels = distance_of_ray(solar_zenith[clouds], antisolar_s, 60)
     out_mask = np.ones_like(solar_azimuth)*1e6
     for _l in range(len(clouds_loc[0])):

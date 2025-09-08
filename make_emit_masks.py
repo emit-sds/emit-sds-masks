@@ -183,7 +183,7 @@ def main():
     irr_resamp = np.array(irr_resamp, dtype=np.float32)
 
     rdn_dataset = gdal.Open(args.rdnfile, gdal.GA_ReadOnly)
-    maskbands = 9
+    maskbands = 11
 
     # Build output dataset
     driver = gdal.GetDriverByName('ENVI')
