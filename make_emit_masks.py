@@ -183,7 +183,7 @@ def main():
     irr_resamp = np.array(irr_resamp, dtype=np.float32)
 
     rdn_dataset = gdal.Open(args.rdnfile, gdal.GA_ReadOnly)
-    maskbands = 9
+    maskbands = 11
 
     # Build output dataset
     driver = gdal.GetDriverByName('ENVI')
@@ -224,14 +224,25 @@ def main():
     mask[:, 7, :] = np.logical_or(np.sum(mask[:,0:5,:], axis=1) > 0, mask[:,5,:] > args.aerosol_threshold)
 
     # SpecTF-Cloud probability
-    mask[:,8,:] = cloud_dset.ReadAsArray()
+    mask[:, 8, :] = cloud_dset.ReadAsArray()
+
+    # To-do - ideally get this threshold from spectf repository
+    mask[:, 9, :] = mask[:, 8, :] > 0.51
+
+    tfinv = np.logical_not(mask[:, 8, :])
+    tfinv[bad] = 1
+    tf_distance = distance_transform_edt(tfinv)
+    tf_distance[tf_distance >= cloud_distance] = 0
+    tf_distance[bad] = -9999.0
+    mask[:, 10, :] = tf_distance
 
     hdr = rdn_hdr.copy()
     hdr['bands'] = str(maskbands)
     hdr['band names'] = ['Cloud flag', 'Cirrus flag', 'Water flag',
                          'Spacecraft Flag', 'Dilated Cloud Flag',
                          'AOD550', 'H2O (g cm-2)', 'Aggregate Flag',
-                         'SpecTf-Cloud probability']
+                         'SpecTf-Cloud probability', 'SpecTf-Cloud flag',
+                         'SpecTF-Buffer Distance']
     hdr['interleave'] = 'bil'
     del hdr['wavelength']
     del hdr['fwhm']
