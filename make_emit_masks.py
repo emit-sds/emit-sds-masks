@@ -229,7 +229,7 @@ def main():
     # To-do - ideally get this threshold from spectf repository
     mask[:, 9, :] = mask[:, 8, :] > 0.51
 
-    tfinv = np.logical_not(mask[:, 8, :])
+    tfinv = np.logical_not(mask[:, 9, :])
     tfinv[bad] = 1
     tf_distance = distance_transform_edt(tfinv)
     tf_distance[tf_distance >= cloud_distance] = 0
