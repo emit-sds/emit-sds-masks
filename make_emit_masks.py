@@ -207,7 +207,7 @@ def main():
                          'Spacecraft Flag', 'Dilated Cloud Flag',
                          'AOD550', 'H2O (g cm-2)', 'Aggregate Flag',
                          'SpecTf-Cloud Probability', 'SpecTf-Cloud Flag',
-                         'SpecTF-Buffer Distance']
+                         'SpecTf-Buffer Distance']
     hdr['interleave'] = 'bil'
     del hdr['wavelength']
     del hdr['fwhm']
