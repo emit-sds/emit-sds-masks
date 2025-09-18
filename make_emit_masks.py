@@ -195,7 +195,7 @@ def main():
     tfinv = np.logical_not(mask[..., 9])
     tfinv[bad] = 1
     tf_distance = distance_transform_edt(tfinv)
-    tf_distance[cloud_projection_dist <= tf_distance] = 0
+    tf_distance[cloud_projection_dist <= tf_distance] = -1
     mask[..., 10] = tf_distance
 
     mask[bad, :] = -9999.0
@@ -203,10 +203,10 @@ def main():
 
     hdr = rdn_hdr.copy()
     hdr['bands'] = str(maskbands)
-    hdr['band names'] = ['Cloud flag', 'Cirrus flag', 'Water flag',
+    hdr['band names'] = ['Cloud Flag', 'Cirrus Flag', 'Water Flag',
                          'Spacecraft Flag', 'Dilated Cloud Flag',
                          'AOD550', 'H2O (g cm-2)', 'Aggregate Flag',
-                         'SpecTf-Cloud probability', 'SpecTf-Cloud flag',
+                         'SpecTf-Cloud Probability', 'SpecTf-Cloud Flag',
                          'SpecTF-Buffer Distance']
     hdr['interleave'] = 'bil'
     del hdr['wavelength']
