@@ -12,9 +12,6 @@ from spectral.io import envi
 from scipy.ndimage.morphology import distance_transform_edt
 from isofit.core.common import resample_spectrum
 from emit_utils.file_checks import envi_header
-import ray
-import multiprocessing
-import xarray as xr
 
 
 def haversine_distance(lon1, lat1, lon2, lat2, radius=6335439):
