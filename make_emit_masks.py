@@ -12,9 +12,6 @@ from spectral.io import envi
 from scipy.ndimage.morphology import distance_transform_edt
 from isofit.core.common import resample_spectrum
 from emit_utils.file_checks import envi_header
-import ray
-import multiprocessing
-import xarray as xr
 
 
 def haversine_distance(lon1, lat1, lon2, lat2, radius=6335439):
@@ -39,72 +36,6 @@ def haversine_distance(lon1, lat1, lon2, lat2, radius=6335439):
                                * np.cos(lat2) * np.sin(delta_lon/2)**2))
 
     return d
-
-@ray.remote
-def build_line_masks(start_line: int, stop_line: int, rdnfile: str, locfile: str, obsfile: str, atmfile: str, h2o_band: np.array, aod_bands: np.array, pixel_size: float, wl: np.array, irr: np.array):
-    # determine glint bands having negligible water reflectance
-    b450 = np.argmin(abs(wl-450))
-    b762 = np.argmin(abs(wl-762))
-    b780 = np.argmin(abs(wl-780))
-    b1000 = np.argmin(abs(wl-1000))
-    b1250 = np.argmin(abs(wl-1250))
-    b1380 = np.argmin(abs(wl-1380))
-    b1650 = np.argmin(abs(wl-1650))
-
-    rdn_ds = envi.open(envi_header(rdnfile)).open_memmap(interleave='bil')
-    loc_ds = envi.open(envi_header(locfile)).open_memmap(interleave='bil')
-    obs_ds = envi.open(envi_header(obsfile)).open_memmap(interleave='bil')
-    atm_ds = envi.open(envi_header(atmfile)).open_memmap(interleave='bil')
-
-    return_mask = np.zeros((stop_line - start_line, 8, rdn_ds.shape[2]))
-    for line in range(start_line, stop_line):
-        print(f'{line} / {stop_line - start_line}')
-        loc = loc_ds[line,...].copy().astype(np.float32).T
-        rdn = rdn_ds[line,...].copy().astype(np.float32).T
-        atm = atm_ds[line,...].copy().astype(np.float32).T
-
-        zen = np.radians(obs_ds[line,4].copy().astype(np.float32).T)
-
-        latitude = loc[:, 1]
-
-        rho = (((rdn * np.pi) / (irr.T)).T / np.cos(zen)).T
-
-        rho[rho[:, 0] <= -9990, :] = -9999.0
-        bad = (latitude <= -9990).T
-
-        # Cloud threshold from Sandford et al.
-        total = np.array(rho[:, b450] > 0.28, dtype=int) + \
-            np.array(rho[:, b1250] > 0.46, dtype=int) + \
-            np.array(rho[:, b1650] > 0.22, dtype=int)
-
-        maskbands = 8
-        mask = np.zeros((maskbands, rdn.shape[0]))
-        mask[0, :] = total > 2
-
-        # Cirrus Threshold from Gao and Goetz, GRL 20:4, 1993
-        mask[1, :] = np.array(rho[:, b1380] > 0.1, dtype=int)
-
-        # Water threshold as in CORAL
-        mask[2, :] = np.array(rho[:, b1000] < 0.05, dtype=int)
-
-        # Threshold spacecraft parts using their lack of an O2 A Band
-        mask[3, :] = np.array(rho[:, b762]/rho[:, b780] > 0.8, dtype=int)
-
-        max_cloud_height = 3000.0
-        mask[4, :] = np.tan(zen) * max_cloud_height / pixel_size
-
-        # AOD 550
-        mask[5, :] = atm[:, aod_bands].sum(axis=1)
-
-        mask[6, :] = atm[:, h2o_band].T
-
-        # Remove water and spacecraft flagsg if cloud flag is on (mostly cosmetic)
-        mask[2:4, np.logical_or(mask[0,:] == 1, mask[1,:] ==1)] = 0
-
-        mask[:, bad] = -9999.0
-        return_mask[line - start_line,...] = mask.copy()
-
-    return return_mask, start_line, stop_line
 
 def main():
 
@@ -194,47 +125,81 @@ def main():
     outDataset.SetGeoTransform(rdn_dataset.GetGeoTransform())
     del outDataset
 
-    rayargs = {'local_mode': args.n_cores == 1}
-    if args.n_cores <= 0:
-        args.n_cores = multiprocessing.cpu_count()
-    rayargs['num_cpus'] = args.n_cores
-    ray.init(**rayargs)
+    # replace previous build_line_masks
+    b450 = np.argmin(abs(wl-450))
+    b762 = np.argmin(abs(wl-762))
+    b780 = np.argmin(abs(wl-780))
+    b1000 = np.argmin(abs(wl-1000))
+    b1250 = np.argmin(abs(wl-1250))
+    b1380 = np.argmin(abs(wl-1380))
+    b1650 = np.argmin(abs(wl-1650))
 
-    linebreaks = np.linspace(0, rdn_shp[0], num=args.n_cores*3).astype(int)
+    rdn_ds = envi.open(envi_header(args.rdnfile)).open_memmap(interleave='bip')
+    obs_ds = envi.open(envi_header(args.obsfile)).open_memmap(interleave='bip')
+    atm_ds = envi.open(envi_header(args.atmfile)).open_memmap(interleave='bip')
 
-    irrid = ray.put(irr_resamp)
-    jobs = [build_line_masks.remote(linebreaks[_l], linebreaks[_l+1], args.rdnfile, args.locfile, args.obsfile, args.atmfile, h2o_band, aod_bands, pixel_size, wl, irrid) for _l in range(len(linebreaks)-1)]
-    rreturn = [ray.get(jid) for jid in jobs]
-    ray.shutdown()
+    rdn = rdn_ds.copy().astype(np.float32)
+    atm = atm_ds.copy().astype(np.float32)
+    zen = np.radians(obs_ds[...,4].copy().astype(np.float32))
 
-    mask = np.zeros((rdn_shp[0], maskbands, rdn_shp[2]))
-    for lm, start_line, stop_line in rreturn:
-        mask[start_line:stop_line,:8] = lm
+    rho = rdn * np.pi / irr_resamp[np.newaxis, np.newaxis, :] / np.cos(zen)[..., np.newaxis]
 
-    bad = np.squeeze(mask[:, 0, :]) <= -9990
+    bad = rdn[..., 0] <= -9990
+    rho[bad, :] = -9999.0
+
+    # Cloud threshold from Sandford et al.
+    total = np.array(rho[..., b450] > 0.28, dtype=int) + \
+        np.array(rho[..., b1250] > 0.46, dtype=int) + \
+        np.array(rho[..., b1650] > 0.22, dtype=int)
+
+    maskbands = 11
+    mask = np.zeros((rdn_shp[0], rdn_shp[2], maskbands))
+    mask[..., 0] = total > 2
+
+    # Cirrus Threshold from Gao and Goetz, GRL 20:4, 1993
+    mask[..., 1] = np.array(rho[..., b1380] > 0.1, dtype=int)
+
+    # Water threshold as in CORAL
+    mask[..., 2] = np.array(rho[..., b1000] < 0.05, dtype=int)
+
+    # Threshold spacecraft parts using their lack of an O2 A Band
+    mask[..., 3] = np.array(rho[..., b762]/rho[..., b780] > 0.8, dtype=int)
+
+    max_cloud_height = 3000.0
+    cloud_projection_dist = np.tan(zen) * max_cloud_height / pixel_size
+
+    # AOD 550
+    mask[..., 5] = atm[..., aod_bands].sum(axis=1)
+
+    mask[..., 6] = atm[..., h2o_band].squeeze()
+
+    # Remove water and spacecraft flagsg if cloud flag is on (mostly cosmetic)
+    mask[np.logical_or(mask[...,0] == 1, mask[...,1] ==1), 2:4] = 0
 
     # Create buffer around clouds (main and cirrus)
-    cloudinv = np.logical_not(np.squeeze(np.logical_or(mask[:, 0, :], mask[:,1,:])))
+    cloudinv = np.logical_not(np.squeeze(np.logical_or(mask[..., 0], mask[...,1])))
     cloudinv[bad] = 1
     cloud_distance = distance_transform_edt(cloudinv)
-    invalid = np.squeeze(mask[:, 4, :]) >= cloud_distance
-    mask[:, 4, :] = invalid.copy()
+    invalid = np.squeeze(cloud_projection_dist) >= cloud_distance
+    mask[..., 4] = invalid.copy()
 
     # Combine Cloud, Cirrus, Water, Spacecraft, and Buffer masks
-    mask[:, 7, :] = np.logical_or(np.sum(mask[:,0:5,:], axis=1) > 0, mask[:,5,:] > args.aerosol_threshold)
+    mask[..., 7] = np.logical_or(np.sum(mask[...,0:5], axis=-1) > 0, mask[...,5] > args.aerosol_threshold)
 
     # SpecTF-Cloud probability
-    mask[:, 8, :] = cloud_dset.ReadAsArray()
+    mask[..., 8] = cloud_dset.ReadAsArray()
 
     # To-do - ideally get this threshold from spectf repository
-    mask[:, 9, :] = mask[:, 8, :] > 0.51
+    mask[..., 9] = mask[..., 8] > 0.51
 
-    tfinv = np.logical_not(mask[:, 9, :])
+    tfinv = np.logical_not(mask[..., 9])
     tfinv[bad] = 1
     tf_distance = distance_transform_edt(tfinv)
-    tf_distance[tf_distance >= cloud_distance] = 0
-    tf_distance[bad] = -9999.0
-    mask[:, 10, :] = tf_distance
+    tf_distance[cloud_projection_dist <= tf_distance] = 0
+    mask[..., 10] = tf_distance
+
+    mask[bad, :] = -9999.0
+    mask = mask.transpose((0,2,1))
 
     hdr = rdn_hdr.copy()
     hdr['bands'] = str(maskbands)
