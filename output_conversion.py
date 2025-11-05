@@ -19,6 +19,7 @@ def main():
 
     parser.add_argument('mask_output_filename', type=str, help="Output Mask netcdf filename")
     parser.add_argument('mask_file', type=str, help="EMIT L2A cloud mask ENVI file")
+    parser.add_argument('band_mask_file', type=str, help="EMIT L1B band mask ENVI file")
     parser.add_argument('loc_file', type=str, help="EMIT L1B location data ENVI file")
     parser.add_argument('glt_file', type=str, help="EMIT L1B glt ENVI file")
     parser.add_argument('version', type=str, help="3 digit (with leading V) version number")
@@ -34,6 +35,7 @@ def main():
         logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=args.log_level, filename=args.log_file)
 
     mask_ds = envi.open(envi_header(args.mask_file))
+    bandmask_ds = envi.open(envi_header(args.band_mask_file))
 
     # Start Mask File
 
@@ -54,6 +56,7 @@ Geolocation data (latitude, longitude, height) and a lookup table to project the
 
     logging.debug('Creating dimensions')
     makeDims(nc_ds, args.mask_file, args.glt_file)
+    nc_ds.createDimension('packed_wavelength_bands', int(bandmask_ds.metadata['bands']))
 
     logging.debug('Creating and writing mask metadata')
     add_variable(nc_ds, "sensor_band_parameters/mask_bands", str, "Mask Band Names", None,
@@ -68,6 +71,8 @@ Geolocation data (latitude, longitude, height) and a lookup table to project the
     logging.debug('Write mask data')
     add_variable(nc_ds, 'mask', "f4", "Masks", "unitless", mask_ds.open_memmap(interleave='bip')[...].copy(),
                  {"dimensions":("downtrack", "crosstrack", "bands"), "zlib": True, "complevel": 9})
+    add_variable(nc_ds, 'band_mask', "u1", "Per-Wavelength Mask", "unitless", bandmask_ds.open_memmap(interleave='bip')[...].copy(),
+                 {"dimensions":("downtrack", "crosstrack", "packed_wavelength_bands"), "zlib": True, "complevel": 9}, fill_value = None)
     nc_ds.sync()
     nc_ds.close()
     del nc_ds
