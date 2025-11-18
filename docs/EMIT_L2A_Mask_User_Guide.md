@@ -28,11 +28,11 @@ EMIT is operating from the ISS, orbiting Earth approx.16 times in a 24-hour day 
 
 The "EMIT L2A Mask 60 m V002" collection (EMITL2AMASK) contains a single NetCDF file with multiple layers.  Each granule represents a single scene and comes with a quicklook PNG file (Browse), as described in Table 1-1.
 
-Table 1 1: EMITL2BFRCOV collection file list and naming convention
+Table 1 1: EMITL2AMASK collection file list and naming convention
 
 |  File  |  Description  |
 |--------|----------------|
-| EMIT_L2A_MASK_&lt;VVV&gt;_&lt;YYYYMMDDTHHMMSS&gt;_&lt;OOOOOOO&gt;_&lt;SSS&gt;.tif  | Mask Data|
+| EMIT_L2A_MASK_&lt;VVV&gt;_&lt;YYYYMMDDTHHMMSS&gt;_&lt;OOOOOOO&gt;_&lt;SSS&gt;.nc  | Mask Data|
 | EMIT_L2A_MASK_&lt;VVV&gt;_&lt;YYYYMMDDTHHMMSS&gt;_&lt;OOOOOOO&gt;_&lt;SSS&gt;.png  | Browse |
 
 &lt;VVV&gt; gives the product version number, e.g., 002
@@ -43,12 +43,46 @@ Table 1 1: EMITL2BFRCOV collection file list and naming convention
 
 &lt;SSS&gt; is the scene identification number within an orbit, e.g., 007
 
+The file structure for the EMIT_L2A_Mask netcdf file is described in Table 1-2.
+
+
+Table 1-2: EMIT L2A Mask NetCDF File Structure
+Field Name | Type | Units | Comments
+----------------|-------|-------|----------------
+Group | Root 
+mask | float32
+Group | location
+GLT-X | int32 | Index
+GLT-Y | int32 | Index
+Lat | float64 | Decimal Degree
+Lon | float64 | Decimal Degree
+Elevation | float32 | Meters
+Group | /sensor_band_parameters
+mask_bands | str Array | Labels | Array of strings indicating the name of each mask band
+
+Each band in the 3D mask array corresponds to a row entry in Table 1-3.  See the ATBD for more details about the generation of each band.
+
+Table 1-3: EMIT L2A Mask Bands
+IDX | Band Name | Band Description
+----|----------------|----------------
+1 | Cloud Flag | Cloud Coverage
+2 | Cirrus Flag | Dense Cirrus Clouds
+3 | Water Flag | Water Bodies
+4 | Spacecraft Flag | Spacecraft or space station components that intersect the EMIT field of view
+5 | Dilated Cloud Flag | Cloud coverage + buffer
+6 | AOD550 (unitless) | AOD at 550nm estimate from L2ARFL
+7 | H2O (g cm$^{-2}$) | Water vapor column estimate from L2ARFL
+8 | Aggregate Flag | Aggregate of all mask flags
+9 | SpecTf Cloud Probability | Probability of cloud presence from SpecTf model
+10 | SpecTf Cloud Flag | Binary cloud flag from SpecTf model
+11 | SpecTf-Buffer Distance | Distance to nearest cloud pixel from SpecTf model
+
 #### 1.4 Product Availability
 The EMIT L2AMASK products will be available at the NASA Land Processes Distributed Active Archive Center (LP DAAC, https://lpdaac.usgs.gov/) and through NASA Earthdata (https://earthdata.nasa.gov/).
 
 
 ### 2	Cloud Mask Generation
-EMIT's Level 2A Mask (L2AMASK) product is generated using outputs from simple band thresholding, atmospheric results from the optimal-estimation based surface and atmospheric modeling in the L2ARFL collection, and a new deep learning model for cloud detection called SpecTF (Li et al, 2025). Code for the collection is available in the [emit-sds-masks](https://github.com/emit-sds/emit-sds-masks) repository.  Code to generate the optimal-estimation based atmospheric components is available as part of the [isofit](https://github.com/isofit/isofit/pulls) repository, and the spectral transformer model is available the [specTF](https://github.com/emit-sds/SpecTf/tree/main/spectf_cloud) repository. 
+EMIT's Level 2A Mask (L2AMASK) product is generated using outputs from simple band thresholding, atmospheric results from the optimal-estimation based surface and atmospheric modeling in the L2ARFL collection, and a new deep learning model for cloud detection called SpecTf (Li et al, 2025). Code for the collection is available in the [emit-sds-masks](https://github.com/emit-sds/emit-sds-masks) repository.  Code to generate the optimal-estimation based atmospheric components is available as part of the [isofit](https://github.com/isofit/isofit/pulls) repository, and the spectral transformer model is available the [specTF](https://github.com/emit-sds/SpecTf/tree/main/spectf_cloud) repository. 
 
 ### 3 References
 
@@ -71,6 +105,6 @@ EMIT's Level 2A Mask (L2AMASK) product is generated using outputs from simple ba
 | PNG     | Portable Network Graphics |
 | QC      | Quality Control |
 | SDS     | Science Data System |
-| SpecTF  | Spectral Transformer Model |
+| SpecTf  | Spectral Transformer Model |
 | SSDR    | Solid-State Data Recorder |
 

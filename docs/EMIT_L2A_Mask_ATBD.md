@@ -33,7 +33,7 @@ because the mask was originally included as part of the L2A Reflectance data pro
 in V02, the mask is being produced as a separate L2A product in order to facilitate
 updates that are independent of updates to reflectance processing.  V02 includes
 all of the same bands as the V01 product, along with 3 new bands for cloud
-masking based on SpecTF, a deep learning model for cloud detection detailed below.  The V02 product also fixes an issue with the nodata values in the V01 product, setting all values
+masking based on SpecTf, a deep learning model for cloud detection detailed below.  The V02 product also fixes an issue with the nodata values in the V01 product, setting all values
 where the onboard cloudscreening was flagged (and no data downlinked) to -9999.
 
 <div style="page-break-after: always;"></div>
@@ -153,7 +153,7 @@ analysis.  The level of detail - and in sometimes redundant estimates of the sam
 the utility for different objectives.
 
 
-#### 4.2.1 SpecTF
+#### 4.2.1 SpecTf
 
 ##### Training Data
 
@@ -236,8 +236,8 @@ These pixels are typically assigned the reserved (floating point) value -9999.
 
 ## **5. Calibration, uncertainty characterization and propagation, and validation**
 
-The SpecTF model outputs are the only outputs with an estimate of uncertainty.
-For these SpecTF predictions, we quantify uncertainty directly from the model’s posterior class probabilities. Given the calibration curve on our [test set](https://zenodo.org/records/15833303/files/test_fids.csv) provided below, the model is near-perfectly calibrated given how close it is to a perfect linear fit. This means that the posterior probabilities reliably approximate the likelihood that a given spectra is of a specific class. Roughly, a given probability score will only be between an overconfidence of $2.2$% or underconfidence of $1.5$%. 
+The SpecTf model outputs are the only outputs with an estimate of uncertainty.
+For these SpecTf predictions, we quantify uncertainty directly from the model’s posterior class probabilities. Given the calibration curve on our [test set](https://zenodo.org/records/15833303/files/test_fids.csv) provided below, the model is near-perfectly calibrated given how close it is to a perfect linear fit. This means that the posterior probabilities reliably approximate the likelihood that a given spectra is of a specific class. Roughly, a given probability score will only be between an overconfidence of $2.2$% or underconfidence of $1.5$%. 
 <center><img src="figs/calibration-curve.png" alt="calibration curve" width="400"></center>
 
 Thus, when interpreting the output probabilities, one can reliably infer that $f(x) ≈ P(class=c|x)$ where $f(•)$ is the model. 
