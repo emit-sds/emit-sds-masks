@@ -60,7 +60,7 @@ Geolocation data (latitude, longitude, height) and a lookup table to project the
 
     logging.debug('Creating and writing mask metadata')
     add_variable(nc_ds, "sensor_band_parameters/mask_bands", str, "Mask Band Names", None,
-                 mask_ds.metadata['band names'], {"dimensions": ("bands",)})
+                 mask_ds.metadata['band names'], {"dimensions": ("bands",)}, fill_value = None)
 
     logging.debug('Creating and writing location data')
     add_loc(nc_ds, args.loc_file)
@@ -70,9 +70,7 @@ Geolocation data (latitude, longitude, height) and a lookup table to project the
 
     logging.debug('Write mask data')
     add_variable(nc_ds, 'mask', "f4", "Masks", "unitless", mask_ds.open_memmap(interleave='bip')[...].copy(),
-                 {"dimensions":("downtrack", "crosstrack", "bands"), "zlib": True, "complevel": 9})
-    add_variable(nc_ds, 'band_mask', "u1", "Per-Wavelength Mask", "unitless", bandmask_ds.open_memmap(interleave='bip')[...].copy(),
-                 {"dimensions":("downtrack", "crosstrack", "packed_wavelength_bands"), "zlib": True, "complevel": 9}, fill_value = None)
+                 {"dimensions":("downtrack", "crosstrack", "bands"), "zlib": True, "complevel": 9}, fill_value = -9999)
     nc_ds.sync()
     nc_ds.close()
     del nc_ds
