@@ -39,7 +39,7 @@ Table 1 1: EMITL2AMASK collection file list and naming convention
 
 &lt;YYYYMMDDTHHMMSS&gt; is a time stamp, e.g., 20220101T083015
 
-&lt;OOOOO&gt; is the unique orbit identification number, e.g., 2530101
+&lt;OOOOOOO&gt; is the unique orbit identification number, e.g., 2530101
 
 &lt;SSS&gt; is the scene identification number within an orbit, e.g., 007
 
@@ -47,18 +47,15 @@ The file structure for the EMIT_L2A_Mask netcdf file is described in Table 1-2.
 
 
 Table 1-2: EMIT L2A Mask NetCDF File Structure
-Field Name | Type | Units | Comments
-----------------|-------|-------|----------------
-Group | Root 
-mask | float32
-Group | location
-GLT-X | int32 | Index
-GLT-Y | int32 | Index
-Lat | float64 | Decimal Degree
-Lon | float64 | Decimal Degree
-Elevation | float32 | Meters
-Group | /sensor_band_parameters
-mask_bands | str Array | Labels | Array of strings indicating the name of each mask band
+Group | Field Name | Type | Units | Comments
+---------|----------------|-------|-------|----------------
+Root | mask | float32 | Unitless | Masks
+location | glt_x | int32 | Pixel location | GLT Sample Lookup
+location | glt_y | int32 | Pixel location | GLT Line Lookup
+location | lat | float64 | Decimal degrees north | Latitude (WGS-84)
+location | lon | float64 | Decimal degrees east | Longitude (WGS-84)
+location | elev | float32 | Meters | Surface Elevation
+sensor_band_parameters | mask_bands | str Array | Labels | Array of strings indicating the name of each mask band
 
 Each band in the 3D mask array corresponds to a row entry in Table 1-3.  See the ATBD for more details about the generation of each band.
 
