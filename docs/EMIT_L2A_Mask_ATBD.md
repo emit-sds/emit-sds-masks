@@ -1,6 +1,6 @@
-## **Earth Surface Mineral dust source InvesTigation (EMIT)** 
+# **Earth Surface Mineral dust source InvesTigation (EMIT)** 
 
-# **EMIT L2B Algorithm: Masks** 
+## **EMIT L2B Algorithm: Masks** 
 
 *Philip G. Brodrick*<sup>1</sup>
 *Jake H. Lee*<sup>1</sup>
@@ -44,6 +44,7 @@ where the onboard cloudscreening was flagged (and no data downlinked) to -9999.
 Philip G. Brodrick (Jet Propulsion Laboratory)
 David R. Thompson (Jet Propulsion Laboratory)
 Robert O. Green (Jet Propulsion Laboratory)
+Jake H. Lee (Jet Propulsion Laboratory)
 Michael Kiper (Jet Propulsion Laboratory)
 Winston Olson-Duvall (Jet Propulsion Laboratory)
 Sarah R. Lundeen (Jet Propulsion Laboratory)
@@ -83,7 +84,7 @@ for multispectral instruments. These methods rely on learning spatial or tempora
 context for detection; however, clouds rarely maintain a consistent morphology,
 and temporal methods require a consistent time sequence that is not always available.
 
-EMIT leverages its spectral fidelity through the use of SpecTf a deep learning model developed 
+EMIT leverages its spectral fidelity through the use of SpecTf, a deep learning model developed 
 specifically to learn
 spectral features for imaging spectroscopy tasks (Lee et al., 2025). By learning
 from millions of globally diverse hand-labeled examples of clear and cloudy pixels,
@@ -237,18 +238,18 @@ These pixels are typically assigned the reserved (floating point) value -9999.
 ## **5. Calibration, uncertainty characterization and propagation, and validation**
 
 The SpecTf model outputs are the only outputs with an estimate of uncertainty.
-For these SpecTf predictions, we quantify uncertainty directly from the model's posterior class probabilities. Given the calibration curve on our [test set](https://zenodo.org/records/15833303/files/test_fids.csv) provided below, the model is near-perfectly calibrated given how close it is to a perfect linear fit. This means that the posterior probabilities reliably approximate the likelihood that a given spectra is of a specific class. Roughly, a given probability score will only be between an overconfidence of $2.2$% or underconfidence of $1.5$%. 
+For these SpecTf predictions, we quantify uncertainty directly from the model's posterior class probabilities. Given the calibration curve on our [test set](https://zenodo.org/records/15833303/files/test_fids.csv) provided below, the model is near-perfectly calibrated given how close it is to a perfect linear fit. This means that the posterior probabilities reliably approximate the likelihood that a given spectra is of a specific class. Roughly, a given probability score will only be between an overconfidence of 2.2% or underconfidence of 1.5%. 
 <center><img src="figs/calibration-curve.png" alt="calibration curve" width="400"></center>
 
 Thus, when interpreting the output probabilities, one can reliably infer that $f(x) ≈ P(class=c|x)$ where $f(•)$ is the model. 
 
 ## **6. Constraints and Limitations**
-Given that this is a deep learning model trained on a (relatively) small, sparse set of imperfect human labels, it is bound to be an imperfect classifier. Specifically, as a quantitative measure, the model will provide an incorrect label when using the $P(0.51)$ threshold about $4$% of the time, using the labeled test set as ground truth. Some spectra types have been observed to be more difficult than others for our model to classify properly. Namely, these tend to be: 
+Given that this is a deep learning model trained on a (relatively) small, sparse set of imperfect human labels, it is bound to be an imperfect classifier. Specifically, as a quantitative measure, the model will provide an incorrect label when using the probably threshold of 0.51 about 4% of the time, using the labeled test set as ground truth. Some spectra types have been observed to be more difficult than others for our model to classify properly. Namely, these tend to be: 
 - [Figure 1](#fig-1). Scenes where there is a very fine haze. 
 - [Figure 2](#fig-2). Regions in India and the South Asian subcontinent that are high in vegetation and aerosols. 
 - [Figure 3](#fig-3). Pixel regions that intersect with the known artifact on the slit and instrument artifacts towards the focal plane array on the right edge. 
 - [Figure 4](#fig-4). The model also exhibits higher entropy over bright plains and very dense, dark vegetative regions that don't have any cloud trace. 
-    - These values tend to be below the $P(0.51)$ threshold, though, but nonetheless something to look out for.
+    - These values tend to be below the 0.51 probability threshold, though, but should be considered nonetheless.
 
 The below figures are examples of the above described challenge regions, with the RGB and False Color (1380, 1420, and 1890 nm bands) to show the true cloud presence distribution compared to the output SpecTf results.
 
