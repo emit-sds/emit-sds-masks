@@ -237,7 +237,7 @@ These pixels are typically assigned the reserved (floating point) value -9999.
 ## **5. Calibration, uncertainty characterization and propagation, and validation**
 
 The SpecTf model outputs are the only outputs with an estimate of uncertainty.
-For these SpecTf predictions, we quantify uncertainty directly from the model’s posterior class probabilities. Given the calibration curve on our [test set](https://zenodo.org/records/15833303/files/test_fids.csv) provided below, the model is near-perfectly calibrated given how close it is to a perfect linear fit. This means that the posterior probabilities reliably approximate the likelihood that a given spectra is of a specific class. Roughly, a given probability score will only be between an overconfidence of $2.2$% or underconfidence of $1.5$%. 
+For these SpecTf predictions, we quantify uncertainty directly from the model's posterior class probabilities. Given the calibration curve on our [test set](https://zenodo.org/records/15833303/files/test_fids.csv) provided below, the model is near-perfectly calibrated given how close it is to a perfect linear fit. This means that the posterior probabilities reliably approximate the likelihood that a given spectra is of a specific class. Roughly, a given probability score will only be between an overconfidence of $2.2$% or underconfidence of $1.5$%. 
 <center><img src="figs/calibration-curve.png" alt="calibration curve" width="400"></center>
 
 Thus, when interpreting the output probabilities, one can reliably infer that $f(x) ≈ P(class=c|x)$ where $f(•)$ is the model. 
@@ -280,4 +280,4 @@ Additionally, when interpreting the results of the model's posterior probabilite
 
 J.H. Lee, M. Kiper, D.R. Thompson, and P.G. Brodrick, SpecTf: Transformers enable data-driven imaging spectroscopy cloud detection, Proc. Natl. Acad. Sci. U.S.A. 122 (27) e2502903122, https://doi.org/10.1073/pnas.2502903122 (2025).
 
-L. Li, N.M. Mahowald, R.L. Miller, C. Pérez García-Pando, M. Klose, D.S. Hamilton, M. Gonçalves Ageitos, P. Ginoux, Y. Balkanski, R.O. Green, O. Kalashnikova, J.F. Kok, V. Obiso, D. Paynter, and D.R. Thompson: Quantifying the range of the dust direct radiative effect due to source mineralogy uncertainty, Atmos. Chem. Phys., 21, 3973–4005, https://doi.org/10.5194/acp-21-3973-2021 (2021).
+L. Li, N.M. Mahowald, R.L. Miller, C. Pérez García-Pando, M. Klose, D.S. Hamilton, M. Gonçalves Ageitos, P. Ginoux, Y. Balkanski, R.O. Green, O. Kalashnikova, J.F. Kok, V. Obiso, D. Paynter, and D.R. Thompson: Quantifying the range of the dust direct radiative effect due to source mineralogy uncertainty, Atmos. Chem. Phys., 21, 3973-4005, https://doi.org/10.5194/acp-21-3973-2021 (2021).
