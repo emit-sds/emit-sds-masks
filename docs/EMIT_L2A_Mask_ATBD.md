@@ -38,6 +38,20 @@ where the onboard cloudscreening was flagged (and no data downlinked) to -9999.
 
 <div style="page-break-after: always;"></div>
 
+## Table of Contents
+- [1. Key Teammembers](#1-key-teammembers)
+- [2. Historical Context and Background on the EMIT Mission and its Instrumentation](#2-historical-context-and-background-on-the-emit-mission-and-its-instrumentation)
+- [3. Algorithm Rationale](#3-algorithm-rationale)
+- [4. Algorithm Implementation](#4-algorithm-implementation)
+  - [4.1 Input Data](#41-input-data)
+  - [4.2 Theoretical Description](#42-theoretical-description)
+    - [4.2.1 SpecTf](#421-spectf)
+    - [4.2.3 Cloud Buffer](#423-cloud-buffer)
+  - [4.3 Practical Considerations](#43-practical-considerations)
+  - [4.4 Output Data](#44-output-data)
+- [5. Calibration, uncertainty characterization and propagation, and validation](#5-calibration-uncertainty-characterization-and-propagation-and-validation)
+- [6. Constraints and Limitations](#6-constraints-and-limitations)
+- [References](#references)
 
 ## **1. Key Teammembers**
 
