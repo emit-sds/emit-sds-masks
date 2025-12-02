@@ -1,8 +1,23 @@
 # Earth Surface Mineral Dust Source Investigation (EMIT)
 
-## Level 2A Mask Data Product User Guide
+## Level 2A Mask Product User Guide
 
-### Draft v02
+
+**Version:** 0.1 </br>
+**Release Date:** TBD </br>
+**JPL- D-XXXXXX** </br>
+
+Jet Propulsion Laboratory
+California Institute of Technology
+Pasadena, California 91109
+
+**Change Log**
+| Version | Date       | Comments |
+|---------|------------|----------|
+| 0.0     | 2025-09-09 | Initial Draft |
+| 0.1     | 2025-12-02 | Cleanup for initial V002 release |
+
+<div style="page-break-after: always;"></div>
 
 ## Table of Contents
 - [1 Introduction](#1-introduction)

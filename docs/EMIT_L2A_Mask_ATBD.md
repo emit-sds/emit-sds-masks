@@ -1,6 +1,6 @@
 # **Earth Surface Mineral dust source InvesTigation (EMIT)** 
 
-## **EMIT L2B Algorithm: Masks** 
+## EMIT L2A Algorithm: Mask 
 
 *Philip G. Brodrick*<sup>1</sup>
 *Jake H. Lee*<sup>1</sup>
@@ -10,14 +10,13 @@
 
 <sup>1</sup>Jet Propulsion Laboratory, California Institute of Technology
 
-**Version:** 1.0 </br>
+**Version:** 0.1 </br>
 **Release Date:** TBD </br>
 **JPL- D-XXXXXX** </br>
 
-
-Jet Propulsion Laboratory </br>
-California Institute of Technology </br>
-Pasadena, California 91109-8099 </br>
+Jet Propulsion Laboratory
+California Institute of Technology
+Pasadena, California 91109
 
 <div style="page-break-after: always;"></div>
 
@@ -25,6 +24,7 @@ Pasadena, California 91109-8099 </br>
 | Version | Date       | Comments |
 |---------|------------|----------|
 | 0.0     | 2025-09-09 | Initial Draft |
+| 0.1     | 2025-12-02 | Cleanup for initial V002 release |
 
 **Product Release History**
 
