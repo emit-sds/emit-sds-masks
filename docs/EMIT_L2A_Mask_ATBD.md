@@ -1,6 +1,6 @@
 # **Earth Surface Mineral dust source InvesTigation (EMIT)** 
 
-## **EMIT L2B Algorithm: Masks** 
+## EMIT L2A Algorithm: Mask 
 
 *Philip G. Brodrick*<sup>1</sup>
 *Jake H. Lee*<sup>1</sup>
@@ -10,14 +10,13 @@
 
 <sup>1</sup>Jet Propulsion Laboratory, California Institute of Technology
 
-**Version:** 1.0 </br>
+**Version:** 0.1 </br>
 **Release Date:** TBD </br>
 **JPL- D-XXXXXX** </br>
 
-
-Jet Propulsion Laboratory </br>
-California Institute of Technology </br>
-Pasadena, California 91109-8099 </br>
+Jet Propulsion Laboratory
+California Institute of Technology
+Pasadena, California 91109
 
 <div style="page-break-after: always;"></div>
 
@@ -25,6 +24,7 @@ Pasadena, California 91109-8099 </br>
 | Version | Date       | Comments |
 |---------|------------|----------|
 | 0.0     | 2025-09-09 | Initial Draft |
+| 0.1     | 2025-12-02 | Cleanup for initial V002 release |
 
 **Product Release History**
 
@@ -38,6 +38,20 @@ where the onboard cloudscreening was flagged (and no data downlinked) to -9999.
 
 <div style="page-break-after: always;"></div>
 
+## Table of Contents
+- [1. Key Teammembers](#1-key-teammembers)
+- [2. Historical Context and Background on the EMIT Mission and its Instrumentation](#2-historical-context-and-background-on-the-emit-mission-and-its-instrumentation)
+- [3. Algorithm Rationale](#3-algorithm-rationale)
+- [4. Algorithm Implementation](#4-algorithm-implementation)
+  - [4.1 Input Data](#41-input-data)
+  - [4.2 Theoretical Description](#42-theoretical-description)
+    - [4.2.1 SpecTf](#421-spectf)
+    - [4.2.3 Cloud Buffer](#423-cloud-buffer)
+  - [4.3 Practical Considerations](#43-practical-considerations)
+  - [4.4 Output Data](#44-output-data)
+- [5. Calibration, uncertainty characterization and propagation, and validation](#5-calibration-uncertainty-characterization-and-propagation-and-validation)
+- [6. Constraints and Limitations](#6-constraints-and-limitations)
+- [References](#references)
 
 ## **1. Key Teammembers**
 
