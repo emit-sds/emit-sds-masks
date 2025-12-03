@@ -102,6 +102,7 @@ IDX | Band Name | Band Description
 10 | SpecTf Cloud Flag | Binary cloud flag from SpecTf model
 11 | SpecTf-Buffer Distance | Distance to nearest cloud pixel from SpecTf model
 
+
 ### 1.4 Product Availability
 The EMIT L2AMASK products will be available at the NASA Land Processes Distributed Active Archive Center (LP DAAC, https://lpdaac.usgs.gov/) and through NASA Earthdata (https://earthdata.nasa.gov/).
 
