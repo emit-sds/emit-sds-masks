@@ -36,7 +36,6 @@ def main():
     mask_ds = envi.open(envi_header(args.mask_file))
 
     # Start Mask File
-
     # make the netCDF4 file
     logging.info(f'Creating netCDF4 file: {args.mask_output_filename}')
     nc_ds = Dataset(args.mask_output_filename, 'w', clobber=True, format='NETCDF4')
@@ -57,7 +56,7 @@ Geolocation data (latitude, longitude, height) and a lookup table to project the
 
     logging.debug('Creating and writing mask metadata')
     add_variable(nc_ds, "sensor_band_parameters/mask_bands", str, "Mask Band Names", None,
-                 mask_ds.metadata['band names'], {"dimensions": ("bands",)})
+                 mask_ds.metadata['band names'], {"dimensions": ("bands",)}, fill_value = None)
 
     logging.debug('Creating and writing location data')
     add_loc(nc_ds, args.loc_file)
@@ -67,7 +66,7 @@ Geolocation data (latitude, longitude, height) and a lookup table to project the
 
     logging.debug('Write mask data')
     add_variable(nc_ds, 'mask', "f4", "Masks", "unitless", mask_ds.open_memmap(interleave='bip')[...].copy(),
-                 {"dimensions":("downtrack", "crosstrack", "bands"), "zlib": True, "complevel": 9})
+                 {"dimensions":("downtrack", "crosstrack", "bands"), "zlib": True, "complevel": 9}, fill_value = -9999)
     nc_ds.sync()
     nc_ds.close()
     del nc_ds

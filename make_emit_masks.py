@@ -169,7 +169,7 @@ def main():
     cloud_projection_dist = np.tan(zen) * max_cloud_height / pixel_size
 
     # AOD 550
-    mask[..., 5] = atm[..., aod_bands].sum(axis=1)
+    mask[..., 5] = atm[..., aod_bands].sum(axis=2)
 
     mask[..., 6] = atm[..., h2o_band].squeeze()
 
