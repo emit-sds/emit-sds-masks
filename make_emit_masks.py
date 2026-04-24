@@ -152,7 +152,7 @@ def main():
         np.array(rho[..., b1250] > 0.46, dtype=int) + \
         np.array(rho[..., b1650] > 0.22, dtype=int)
 
-    maskbands = 11
+    maskbands = 7
     mask = np.zeros((rdn_shp[0], rdn_shp[2], maskbands))
     mask[..., 0] = total > 2
 
@@ -162,41 +162,27 @@ def main():
     # Water threshold as in CORAL
     mask[..., 2] = np.array(rho[..., b1000] < 0.05, dtype=int)
 
-    # Threshold spacecraft parts using their lack of an O2 A Band
-    mask[..., 3] = np.array(rho[..., b762]/rho[..., b780] > 0.8, dtype=int)
-
     max_cloud_height = 3000.0
     cloud_projection_dist = np.tan(zen) * max_cloud_height / pixel_size
-
-    # AOD 550
-    mask[..., 5] = atm[..., aod_bands].sum(axis=2)
-
-    mask[..., 6] = atm[..., h2o_band].squeeze()
-
-    # Remove water and spacecraft flagsg if cloud flag is on (mostly cosmetic)
-    mask[np.logical_or(mask[...,0] == 1, mask[...,1] ==1), 2:4] = 0
 
     # Create buffer around clouds (main and cirrus)
     cloudinv = np.logical_not(np.squeeze(np.logical_or(mask[..., 0], mask[...,1])))
     cloudinv[bad] = 1
     cloud_distance = distance_transform_edt(cloudinv)
     invalid = np.squeeze(cloud_projection_dist) >= cloud_distance
-    mask[..., 4] = invalid.copy()
-
-    # Combine Cloud, Cirrus, Water, Spacecraft, and Buffer masks
-    mask[..., 7] = np.logical_or(np.sum(mask[...,0:5], axis=-1) > 0, mask[...,5] > args.aerosol_threshold)
+    mask[..., 3] = invalid.copy()
 
     # SpecTF-Cloud probability
-    mask[..., 8] = cloud_dset.ReadAsArray()
+    mask[..., 4] = cloud_dset.ReadAsArray()
 
     # To-do - ideally get this threshold from spectf repository
-    mask[..., 9] = mask[..., 8] > 0.51
+    mask[..., 5] = mask[..., 8] > 0.51
 
     tfinv = np.logical_not(mask[..., 9])
     tfinv[bad] = 1
     tf_distance = distance_transform_edt(tfinv)
     tf_distance[cloud_projection_dist <= tf_distance] = -1
-    mask[..., 10] = tf_distance
+    mask[..., 6] = tf_distance
 
     mask[bad, :] = -9999.0
     mask = mask.transpose((0,2,1))
@@ -204,10 +190,8 @@ def main():
     hdr = rdn_hdr.copy()
     hdr['bands'] = str(maskbands)
     hdr['band names'] = ['Cloud Flag', 'Cirrus Flag', 'Water Flag',
-                         'Spacecraft Flag', 'Dilated Cloud Flag',
-                         'AOD550', 'H2O (g cm-2)', 'Aggregate Flag',
-                         'SpecTf-Cloud Probability', 'SpecTf-Cloud Flag',
-                         'SpecTf-Buffer Distance']
+                         'Dilated Cloud Flag', 'SpecTf-Cloud Probability', 
+                         'SpecTf-Cloud Flag', 'SpecTf-Buffer Distance']
     hdr['interleave'] = 'bil'
     del hdr['wavelength']
     del hdr['fwhm']
