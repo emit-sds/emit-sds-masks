@@ -80,6 +80,5 @@ Geolocation data (latitude, longitude, height) and a lookup table to project the
 
     return
 
-
 if __name__ == '__main__':
     main()

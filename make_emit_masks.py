@@ -43,7 +43,6 @@ def main():
     parser.add_argument('rdnfile', type=str, metavar='RADIANCE')
     parser.add_argument('locfile', type=str, metavar='LOCATIONS')
     parser.add_argument('obsfile', type=str, metavar='OBSERVATIONS')
-    parser.add_argument('atmfile', type=str, metavar='SUBSET_LABELS')
     parser.add_argument('cloudfile', type=str, metavar='SPECTF_CLOUD_PROB')
     parser.add_argument('irrfile', type=str, metavar='SOLAR_IRRADIANCE')
     parser.add_argument('outfile', type=str, metavar='OUTPUT_MASKS')
@@ -54,8 +53,6 @@ def main():
 
     rdn_hdr = envi.read_envi_header(envi_header(args.rdnfile))
     rdn_shp = envi.open(envi_header(args.rdnfile)).open_memmap(interleave='bil').shape
-    atm_hdr = envi.read_envi_header(envi_header(args.atmfile))
-    atm_shp = envi.open(envi_header(args.atmfile)).open_memmap(interleave='bil').shape
     loc_shp = envi.open(envi_header(args.locfile)).open_memmap(interleave='bil').shape
 
     cloud_dset = gdal.Open(args.cloudfile)
@@ -63,8 +60,6 @@ def main():
     # Check file size consistency
     if loc_shp[0] != rdn_shp[0] or loc_shp[2] != rdn_shp[2]:
         raise ValueError('LOC and input file dimensions do not match.')
-    if atm_shp[0] != rdn_shp[0] or atm_shp[2] != rdn_shp[2]:
-        raise ValueError('Label and input file dimensions do not match.')
     if loc_shp[1] != 3:
         raise ValueError('LOC file should have three bands.')
     if cloud_dset.RasterYSize != rdn_shp[0] or cloud_dset.RasterXSize != rdn_shp[2]:
@@ -82,14 +77,6 @@ def main():
             raise IndexError('Could not find fwhm data anywhere')
         else:
             fwhm = np.array([float(f) for f in rdn_hdr['fwhm']])
-
-    # Find H2O and AOD elements in state vector
-    aod_bands, h2o_band = [], []
-    for i, name in enumerate(atm_hdr['band names']):
-        if 'H2O' in name:
-            h2o_band.append(i)
-        elif 'AER' in name or 'AOT' in name or 'AOD' in name:
-            aod_bands.append(i)
 
     # find pixel size
     if 'map info' in rdn_hdr.keys():
@@ -136,10 +123,8 @@ def main():
 
     rdn_ds = envi.open(envi_header(args.rdnfile)).open_memmap(interleave='bip')
     obs_ds = envi.open(envi_header(args.obsfile)).open_memmap(interleave='bip')
-    atm_ds = envi.open(envi_header(args.atmfile)).open_memmap(interleave='bip')
 
     rdn = rdn_ds.copy().astype(np.float32)
-    atm = atm_ds.copy().astype(np.float32)
     zen = np.radians(obs_ds[...,4].copy().astype(np.float32))
 
     rho = rdn * np.pi / irr_resamp[np.newaxis, np.newaxis, :] / np.cos(zen)[..., np.newaxis]
@@ -176,9 +161,9 @@ def main():
     mask[..., 4] = cloud_dset.ReadAsArray()
 
     # To-do - ideally get this threshold from spectf repository
-    mask[..., 5] = mask[..., 8] > 0.51
+    mask[..., 5] = mask[..., 4] > 0.51
 
-    tfinv = np.logical_not(mask[..., 9])
+    tfinv = np.logical_not(mask[..., 5])
     tfinv[bad] = 1
     tf_distance = distance_transform_edt(tfinv)
     tf_distance[cloud_projection_dist <= tf_distance] = -1
