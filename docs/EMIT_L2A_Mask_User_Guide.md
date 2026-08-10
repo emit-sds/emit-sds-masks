@@ -81,7 +81,7 @@ location | glt_x | int32 | Pixel location | GLT Sample Lookup
 location | glt_y | int32 | Pixel location | GLT Line Lookup
 location | lat | float64 | Decimal degrees north | Latitude (WGS-84)
 location | lon | float64 | Decimal degrees east | Longitude (WGS-84)
-location | elev | float32 | Meters | Surface Elevation
+location | elev | float64 | Meters | Surface Elevation
 sensor_band_parameters | mask_bands | str Array | Labels | Array of strings indicating the name of each mask band
 
 Each band in the 3D mask array corresponds to a row entry in Table 1-3.  See the ATBD for more details about the generation of each band.
