@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+#### [v1.0.0](https://github.com/emit-sds/emit-sds-masks/compare/v0.1.1...v1.0.0)
+
+> 3 Sep 2026
+
+* V3 updates by @adamchlus in https://github.com/emit-sds/emit-sds-masks/pull/21
+
 #### [v0.1.1](https://github.com/emit-sds/emit-sds-masks/compare/v0.1.0...v0.1.1)
 
 > 5 Dec 2025
